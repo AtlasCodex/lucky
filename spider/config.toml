@@ -1,0 +1,43 @@
+[dlt]
+url = "https://www.lottery.gov.cn/historykj/history_1.jspx?_ltype=dlt"
+name = "大乐透"
+code = "dlt"
+period = 20
+start = "2007-01-01"
+end = "2017-01-01"
+page = 1
+sleep = 1
+timeout = 10
+
+[ssq]
+url = "https://www.lottery.gov.cn/historykj/history_1.jspx?_ltype=ssq"
+name = "双色球"
+code = "ssq"
+period = 20
+start = "2007-01-01"
+end = "2017-01-01"
+page = 1
+sleep = 1
+timeout = 10
+
+[kl8]
+url = "https://www.lottery.gov.cn/historykj/history_1.jspx?_ltype=kl8"
+name = "快乐8"
+code = "kl8"
+period = 20
+start = "2007-01-01"
+end = "2017-01-01"
+page = 1
+sleep = 1
+timeout = 10
+
+[qxc]
+url = "https://www.lottery.gov.cn/historykj/history_1.jspx?_ltype=qxc"
+name = "七星彩"
+code = "qxc"
+period = 20
+start = "2007-01-01"
+end = "2017-01-01"
+page = 1
+sleep = 1
+timeout = 10

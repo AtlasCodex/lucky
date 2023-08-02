@@ -1,0 +1,5 @@
+2023-09-26T15:29:35.270+0800	INFO	lucky/run.go:10	app started
+2023-09-26T15:45:51.726+0800	INFO	lucky/run.go:10	app started
+2023-09-26T15:46:40.987+0800	ERROR	spider/spider.go:76	无法读取配置文件:	{"error": "open spiderl/config.toml: no such file or directory"}
+2023-09-26T15:46:40.987+0800	INFO	lucky/run.go:10	app started
+2023-09-26T15:49:12.749+0800	INFO	spider/spider.go:88	app started
