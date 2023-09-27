@@ -1,2 +1,0 @@
-2023-09-27T11:37:55.025+0800	INFO	spider/spider.go:116	Visited	{"https://datachart.500.com/dlt/history/newinc/history.php?start=23112&end=999999": ""}
-2023-09-27T11:37:55.145+0800	INFO	spider/spider.go:116	Visited	{"https://datachart.500.com/ssq/history/newinc/history.php?start=23113&end=999999": ""}
