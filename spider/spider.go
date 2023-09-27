@@ -3,10 +3,9 @@ package spider
 import (
 	"encoding/csv"
 	_ "encoding/json"
-	"fmt"
-	"log"
 	"lucky/common/logger"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -20,51 +19,35 @@ import (
 
 type Config struct {
 	DLT struct {
-		URL     string `toml:"url"`
-		Name    string `toml:"name"`
-		Code    string `toml:"code"`
-		Period  int    `toml:"period"`
-		Start   string `toml:"start"`
-		End     string `toml:"end"`
-		Page    int    `toml:"page"`
-		Sleep   int    `toml:"sleep"`
-		Timeout int    `toml:"timeout"`
+		URL   string `toml:"url"`
+		Name  string `toml:"name"`
+		Code  string `toml:"code"`
+		Start string `toml:"start"`
+		End   string `toml:"end"`
 	} `toml:"dlt"`
 
 	SSQ struct {
-		URL     string `toml:"url"`
-		Name    string `toml:"name"`
-		Code    string `toml:"code"`
-		Period  int    `toml:"period"`
-		Start   string `toml:"start"`
-		End     string `toml:"end"`
-		Page    int    `toml:"page"`
-		Sleep   int    `toml:"sleep"`
-		Timeout int    `toml:"timeout"`
+		URL   string `toml:"url"`
+		Name  string `toml:"name"`
+		Code  string `toml:"code"`
+		Start string `toml:"start"`
+		End   string `toml:"end"`
 	} `toml:"ssq"`
 
 	KL8 struct {
-		URL     string `toml:"url"`
-		Name    string `toml:"name"`
-		Code    string `toml:"code"`
-		Period  int    `toml:"period"`
-		Start   string `toml:"start"`
-		End     string `toml:"end"`
-		Page    int    `toml:"page"`
-		Sleep   int    `toml:"sleep"`
-		Timeout int    `toml:"timeout"`
+		URL   string `toml:"url"`
+		Name  string `toml:"name"`
+		Code  string `toml:"code"`
+		Start string `toml:"start"`
+		End   string `toml:"end"`
 	} `toml:"kl8"`
 
 	QXC struct {
-		URL     string `toml:"url"`
-		Name    string `toml:"name"`
-		Code    string `toml:"code"`
-		Period  int    `toml:"period"`
-		Start   string `toml:"start"`
-		End     string `toml:"end"`
-		Page    int    `toml:"page"`
-		Sleep   int    `toml:"sleep"`
-		Timeout int    `toml:"timeout"`
+		URL   string `toml:"url"`
+		Name  string `toml:"name"`
+		Code  string `toml:"code"`
+		Start string `toml:"start"`
+		End   string `toml:"end"`
 	} `toml:"qxc"`
 }
 
@@ -104,19 +87,25 @@ func init() {
 		logger.Log.Error("无法解析配置文件:", zap.Error(err))
 		return
 	}
-	fetchDataAndParse(config.DLT.URL, config.DLT.Start, config.DLT.End)
-	//fetchDataAndParse(config.SSQ.URL, config.SSQ.Start, config.SSQ.End)
-	//SSQ := fetchDataAndParse(config.SSQ.URL, config.SSQ.Start, config.SSQ.End)
-	//fmt.Println(SSQ)
+	if LastNumber(config.DLT.Code) == 0 {
+		fetchDataAndParse(config.DLT.URL, config.DLT.Start, config.DLT.End, config.DLT.Code)
+	} else {
+		fetchDataAndParse(config.DLT.URL, strconv.Itoa(LastNumber(config.DLT.Code)+1), config.DLT.End, config.DLT.Code)
+	}
+	if LastNumber(config.SSQ.Code) == 0 {
+		fetchDataAndParse(config.SSQ.URL, config.SSQ.Start, config.SSQ.End, config.SSQ.Code)
+	} else {
+		fetchDataAndParse(config.SSQ.URL, strconv.Itoa(LastNumber(config.SSQ.Code)+1), config.SSQ.End, config.SSQ.Code)
+	}
+	//fetchDataAndParse(config.DLT.URL, config.DLT.Start, config.DLT.End, config.DLT.Code)
+	//fetchDataAndParse(config.SSQ.URL, config.SSQ.Start, config.SSQ.End, config.SSQ.Code)
 
 }
 
-func New() {
-	logger.Log.Info("app started")
-}
+func New() {}
 
 // 请求URL并解析数据
-func fetchDataAndParse(url, start, end string) {
+func fetchDataAndParse(url, start, end, code string) {
 	// 构建请求URL
 	fullURL := url + "?start=" + start + "&end=" + end
 
@@ -124,32 +113,60 @@ func fetchDataAndParse(url, start, end string) {
 
 	// 处理响应
 	c.OnResponse(func(r *colly.Response) {
-		fmt.Println("Visited", r.Ctx.Get("url"))
+		logger.Log.Info("Visited", zap.String(fullURL, r.Ctx.Get(fullURL)))
 	})
 
 	var lotteries []Lottery
-	c.OnHTML("tr[class=t_tr1]", func(e *colly.HTMLElement) {
-		var l Lottery
-		l.Issue = e.ChildText("td:nth-child(1)")
-		l.Num1 = e.ChildText("td:nth-child(2)")
-		l.Num2 = e.ChildText("td:nth-child(3)")
-		l.Num3 = e.ChildText("td:nth-child(4)")
-		l.Num4 = e.ChildText("td:nth-child(5)")
-		l.Num5 = e.ChildText("td:nth-child(6)")
-		l.Num6 = e.ChildText("td:nth-child(7)")
-		l.Num7 = e.ChildText("td:nth-child(8)")
-		l.Pool = e.ChildText("td:nth-child(9)")
-		l.ONumberNotes = e.ChildText("td:nth-child(10)")
-		l.OBonus = e.ChildText("td:nth-child(11)")
-		l.TNumberNotes = e.ChildText("td:nth-child(12)")
-		l.TBonus = e.ChildText("td:nth-child(13)")
-		l.TotalNotes = e.ChildText("td:nth-child(14)")
-		l.Datatime = e.ChildText("td:nth-child(15)")
-		lotteries = append(lotteries, l)
-		SaveToCSV(lotteries)
-		// lotteries保存为 data.csv
+	if code == "dlt" {
+		c.OnHTML("tbody[id=tdata]", func(e *colly.HTMLElement) {
 
-	})
+			e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
+				var l Lottery
+				l.Issue = el.DOM.Find("td:nth-child(1)").Text()
+				l.Num1 = el.DOM.Find("td:nth-child(2)").Text()
+				l.Num2 = el.DOM.Find("td:nth-child(3)").Text()
+				l.Num3 = el.DOM.Find("td:nth-child(4)").Text()
+				l.Num4 = el.DOM.Find("td:nth-child(5)").Text()
+				l.Num5 = el.DOM.Find("td:nth-child(6)").Text()
+				l.Num6 = el.DOM.Find("td:nth-child(7)").Text()
+				l.Num7 = el.DOM.Find("td:nth-child(8)").Text()
+				l.Pool = el.DOM.Find("td:nth-child(9)").Text()
+				l.ONumberNotes = el.DOM.Find("td:nth-child(10)").Text()
+				l.OBonus = el.DOM.Find("td:nth-child(11)").Text()
+				l.TNumberNotes = el.DOM.Find("td:nth-child(12)").Text()
+				l.TBonus = el.DOM.Find("td:nth-child(13)").Text()
+				l.TotalNotes = el.DOM.Find("td:nth-child(14)").Text()
+				l.Datatime = el.DOM.Find("td:nth-child(15)").Text()
+				lotteries = append(lotteries, l)
+				SaveToCSV(lotteries, code)
+			})
+		})
+
+	}
+	if code == "ssq" {
+		c.OnHTML("tbody[id=tdata]", func(e *colly.HTMLElement) {
+			e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
+				var l Lottery
+				l.Issue = el.DOM.Find("td:nth-child(1)").Text()
+				l.Num1 = el.DOM.Find("td:nth-child(2)").Text()
+				l.Num2 = el.DOM.Find("td:nth-child(3)").Text()
+				l.Num3 = el.DOM.Find("td:nth-child(4)").Text()
+				l.Num4 = el.DOM.Find("td:nth-child(5)").Text()
+				l.Num5 = el.DOM.Find("td:nth-child(6)").Text()
+				l.Num6 = el.DOM.Find("td:nth-child(7)").Text()
+				l.Num7 = el.DOM.Find("td:nth-child(8)").Text()
+				l.Pool = el.DOM.Find("td:nth-child(10)").Text()
+				l.ONumberNotes = el.DOM.Find("td:nth-child(11)").Text()
+				l.OBonus = el.DOM.Find("td:nth-child(12)").Text()
+				l.TNumberNotes = el.DOM.Find("td:nth-child(13)").Text()
+				l.TBonus = el.DOM.Find("td:nth-child(14)").Text()
+				l.TotalNotes = el.DOM.Find("td:nth-child(15)").Text()
+				l.Datatime = el.DOM.Find("td:nth-child(16)").Text()
+				lotteries = append(lotteries, l)
+				SaveToCSV(lotteries, code)
+			})
+		})
+	}
 
 	// 设置抓取参数
 	c.SetRequestTimeout(100 * time.Second)
@@ -164,16 +181,28 @@ func fetchDataAndParse(url, start, end string) {
 
 }
 
-func SaveToCSV(lotteries []Lottery) {
+func SaveToCSV(lotteries []Lottery, code string) {
 
-	file, err := os.Create("data.csv")
+	var file *os.File
+	var err error
+	if code == "ssq" {
+		file, err = os.Create("data/ssq.csv")
+		if err != nil {
+			logger.Log.Error("无法创建文件ssq.csv:", zap.Error(err))
+		}
+	} else if code == "dlt" {
+		file, err = os.Create("data/dlt.csv")
+		if err != nil {
+			logger.Log.Error("无法创建文件dlt.csv:", zap.Error(err))
+		}
+	}
 	if err != nil {
-		log.Fatalln("Unable to open file", err)
+		logger.Log.Error("无法创建文件:", zap.Error(err))
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-
+			logger.Log.Error("无法关闭文件:", zap.Error(err))
 		}
 	}(file)
 
@@ -184,8 +213,7 @@ func SaveToCSV(lotteries []Lottery) {
 	header := []string{"Issue", "Num1", "Num2", "Num3", "Num4", "Num5", "Num6", "Num7", "Pool", "ONumberNotes", "OBonus", "TNumberNotes", "TBonus", "TotalNotes", "Datatime"}
 	err = writer.Write(header)
 	if err != nil {
-		log.Fatalln("Error writing record to csv:", err)
-
+		logger.Log.Error("Error writing record to csv:", zap.Error(err))
 	}
 
 	// 写入数据
@@ -193,8 +221,44 @@ func SaveToCSV(lotteries []Lottery) {
 		data := []string{l.Issue, l.Num1, l.Num2, l.Num3, l.Num4, l.Num5, l.Num6, l.Num7, l.Pool, l.ONumberNotes, l.OBonus, l.TNumberNotes, l.TBonus, l.TotalNotes, l.Datatime}
 		err := writer.Write(data)
 		if err != nil {
-			log.Fatalln("Error writing record to csv:", err)
-
+			logger.Log.Error("Error writing record to csv:", zap.Error(err))
 		}
 	}
+}
+
+/**
+* 读取 csv 文件
+* @param code string
+* @return int
+ */
+func LastNumber(code string) int {
+	// 读取“data/{code}.csv”文件,获取第二行的第一个单元格的值
+	// 拼接csv文件路径
+	csvFile := "data/" + code + ".csv"
+
+	// 打开文件
+	f, err := os.Open(csvFile)
+	if err != nil {
+		logger.Log.Error("无法打开文件:", zap.Error(err))
+	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			logger.Log.Error("无法关闭文件:", zap.Error(err))
+		}
+	}(f)
+
+	// 读取CSV
+	r := csv.NewReader(f)
+	records, err := r.ReadAll()
+	if err != nil {
+		logger.Log.Error("无法读取CSV:", zap.Error(err))
+	}
+
+	// 获取第二行数据
+	num, err := strconv.Atoi(records[1][0])
+	if err != nil {
+		logger.Log.Error("无数据:", zap.Error(err))
+	}
+	return num
 }
