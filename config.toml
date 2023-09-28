@@ -26,3 +26,8 @@ name = "七星彩"
 code = "qxc"
 start = "2007-01-01"
 end = "2017-01-01"
+
+
+[logger]
+log_file = "log/monitor.log"
+log_level = "DEBUG"

@@ -73,10 +73,10 @@ type Lottery struct {
  * 爬虫模块，读取config.toml文件配置信息，初始化爬虫
  */
 
-func init() {
+func Spider() {
 	var config Config
 	// 读取配置文件
-	data, err := os.ReadFile("spider/config.toml")
+	data, err := os.ReadFile("config.toml")
 	if err != nil {
 		logger.Log.Error("无法读取配置文件:", zap.Error(err))
 		return
@@ -87,22 +87,17 @@ func init() {
 		logger.Log.Error("无法解析配置文件:", zap.Error(err))
 		return
 	}
-	if LastNumber(config.DLT.Code) == 0 {
-		fetchDataAndParse(config.DLT.URL, config.DLT.Start, config.DLT.End, config.DLT.Code)
-	} else {
-		fetchDataAndParse(config.DLT.URL, strconv.Itoa(LastNumber(config.DLT.Code)+1), config.DLT.End, config.DLT.Code)
-	}
-	if LastNumber(config.SSQ.Code) == 0 {
-		fetchDataAndParse(config.SSQ.URL, config.SSQ.Start, config.SSQ.End, config.SSQ.Code)
-	} else {
-		fetchDataAndParse(config.SSQ.URL, strconv.Itoa(LastNumber(config.SSQ.Code)+1), config.SSQ.End, config.SSQ.Code)
-	}
-	//fetchDataAndParse(config.DLT.URL, config.DLT.Start, config.DLT.End, config.DLT.Code)
-	//fetchDataAndParse(config.SSQ.URL, config.SSQ.Start, config.SSQ.End, config.SSQ.Code)
-
+	//if LastNumber(config.DLT.Code) == 0 {
+	fetchDataAndParse(config.DLT.URL, config.DLT.Start, config.DLT.End, config.DLT.Code)
+	//} else {
+	//	fetchDataAndParse(config.DLT.URL, strconv.Itoa(LastNumber(config.DLT.Code)+1), config.DLT.End, config.DLT.Code)
+	//}
+	//if LastNumber(config.SSQ.Code) == 0 {
+	fetchDataAndParse(config.SSQ.URL, config.SSQ.Start, config.SSQ.End, config.SSQ.Code)
+	//} else {
+	//	fetchDataAndParse(config.SSQ.URL, strconv.Itoa(LastNumber(config.SSQ.Code)+1), config.SSQ.End, config.SSQ.Code)
+	//}
 }
-
-func New() {}
 
 // 请求URL并解析数据
 func fetchDataAndParse(url, start, end, code string) {
